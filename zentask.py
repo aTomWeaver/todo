@@ -52,8 +52,10 @@ class TaskList:
         with open('current.json', 'w', encoding='utf-8') as current:
             json.dump(file_to_write, current)
 
-    def archive_task(self, task):
+    def archive_task(self, task_index):
         '''appends task to archive.json'''
+        # with open('archive.json', 'a', encoding='utf-8') as archive:
+            
         pass
 
     def add_task(self, title, priority, context, project):
@@ -68,8 +70,16 @@ class TaskList:
             title, priority, context, project).get_dict()
         self.write_to_current_json(current_tasks_copy)
 
-    def delete_task(self, task):
-        pass
+    def delete_task(self, task_index):
+        self.refresh_current()
+        # make copy
+        current_tasks_copy = self.current_tasks_dict.copy()
+        # remove element
+        current_tasks_copy.pop(task_index)
+        # reindex
+        current_tasks_copy = reindex(current_tasks_copy)
+        # write copy to json
+        self.write_to_current_json(current_tasks_copy)
 
     def list_current_tasks(self):
         '''prints out tasks to the command line'''
@@ -131,5 +141,5 @@ class Task:
 
 
 current_tasks = TaskList()
+current_tasks.delete_task('2')
 current_tasks.list_current_tasks()
-current_tasks.print_task_list()
