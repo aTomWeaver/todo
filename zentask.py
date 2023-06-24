@@ -4,12 +4,6 @@ from datetime import datetime
 
 tasks = json.load(open('./current.json', 'r'))
 
-
-def refresh_tasks():
-    tasks = json.load(open('./current.json', 'r'))
-
-
-refresh_tasks()
 # helpers
 
 
