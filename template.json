@@ -1,7 +1,22 @@
 {
-  "task_id": {
-    "title": "take out the trash",
-    "priority": "a",
-    "context": "home"
+  "tasks": {
+    "1": {
+      "title": "take out the trash",
+      "priority": "a",
+      "context": "home",
+      "project": "cleanup"
+    },
+    "2": {
+      "title": "title 2",
+      "priority": "b",
+      "context": "office",
+      "project": ""
+    },
+    "4": {
+      "title": "title 3",
+      "priority": "c",
+      "context": "work",
+      "project": "work project"
+    }
   }
 }
