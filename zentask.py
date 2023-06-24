@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from pprint import pprint
 
-current_tasks_dict = json.load(open('./current.json', 'r'))
+# current_tasks_dict = json.load(open('./current.json', 'r'))
 
 # helpers
 
@@ -41,22 +41,48 @@ def get_max_value_length(value, task_dict):
 # classes
 
 
+class Task:
+    def __init__(self, title, priority="u", context="", project=""):
+        self.title = title
+        self.priority = priority
+        self.context = context
+        self.project = project
+
+    def get_dict(self):
+        return {
+            "title": self.title,
+            "priority": self.priority,
+            "context": self.context,
+            "project": self.project
+        }
+
+
 class TaskList:
     def __init__(self):
         self.current_tasks_dict = json.load(open('./current.json', 'r'))
+        self.current_json_path = './current.json'
+        self.archive_json_path = './archive.json'
 
     def refresh_current(self):
         self.current_tasks_dict = json.load(open('./current.json', 'r'))
 
-    def write_to_current_json(self, file_to_write):
-        with open('current.json', 'w', encoding='utf-8') as current:
-            json.dump(file_to_write, current)
+    def write_to_json_file(self, dict, destination):
+        with open(destination, 'w', encoding='utf-8') as destination:
+            json.dump(dict, destination)
 
-    def archive_task(self, task_index):
+    def archive_task(self, task):
         '''appends task to archive.json'''
         # with open('archive.json', 'a', encoding='utf-8') as archive:
+        archive_json_buffer = json.load(open(self.archive_json_path, 'r'))
 
-        pass
+        keys = get_int_key_list(archive_json_buffer)
+        if not keys:
+            index = 1
+        else:
+            index = max(keys) + 1
+
+        archive_json_buffer[index] = task
+        self.write_to_json_file(archive_json_buffer, self.archive_json_path)
 
     def add_task(self, title, priority, context, project):
         '''Saves a new task to current.json from passed props'''
@@ -68,18 +94,19 @@ class TaskList:
 
         current_tasks_copy[str(new_task_index)] = Task(
             title, priority, context, project).get_dict()
-        self.write_to_current_json(current_tasks_copy)
+        self.write_to_json_file(current_tasks_copy, self.current_json_path)
 
     def pop_task(self, task_index):
         self.refresh_current()
-        # make copy
+
         current_tasks_copy = self.current_tasks_dict.copy()
-        # remove element
+        if not task_index in current_tasks_copy:
+            return None
+
         removed = current_tasks_copy.pop(task_index)
-        # reindex
         current_tasks_copy = reindex(current_tasks_copy)
-        # write copy to json
-        self.write_to_current_json(current_tasks_copy)
+        # write modified copy to json
+        self.write_to_json_file(current_tasks_copy, self.current_json_path)
         return removed
 
     def list_current_tasks(self):
@@ -109,40 +136,34 @@ class TaskList:
                 print_line += f'+{task["project"]}'
 
             print(print_line)
+        print('\n')
 
     def complete_task(self, task_index):
         '''moves task from current to archive with a completion date'''
 
-        timestamp = datetime.now().strftime('%Y/%m/%d %H:%M')
-        task = self.pop_task(task_index)
-        task['completed'] = timestamp
+        # edit this to accept n number of task indexes
 
-        self.archive_task(task)
+        try:
+            task = self.pop_task(task_index)
+            timestamp = datetime.now().strftime('%Y/%m/%d %H:%M')
+            task['completed'] = timestamp
 
-        print(
-            f'\nTask completed: {task["title"]}\nCompletion Date: {timestamp}')
-        print(f'\n{task}')
+            self.archive_task(task)
+
+            print(
+                f'\nTask completed: {task["title"]}\nCompletion Date: {timestamp}\n')
+        except:
+            print(f'No task with index {task_index}\n')
+            return None
+
     pass
 
 
-class Task:
-    def __init__(self, title, priority="u", context="", project=""):
-        self.title = title
-        self.priority = priority
-        self.context = context
-        self.project = project
-
-    def get_dict(self):
-        return {
-            "title": self.title,
-            "priority": self.priority,
-            "context": self.context,
-            "project": self.project
-        }
-
-
-current_tasks = TaskList()
-# current_tasks.add_task('newest task', 'b', '', 'new')
-current_tasks.pop_task('3')
-
-current_tasks.list_current_tasks()
+# current_tasks.pop_task('3')
+if __name__ == '__main__':
+    current_tasks = TaskList()
+    # current_tasks.add_task('everything seems to work', 'd', 'home', 'todo app')
+    # current_tasks.complete_task('3')
+    current_tasks.pop_task('2')
+    current_tasks.list_current_tasks()
+    # current_tasks.archive_task('3')

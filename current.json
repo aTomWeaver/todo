@@ -1,1 +1,14 @@
-{"1": {"title": "take out the trash", "priority": "b", "context": "home", "project": "cleanup"}, "2": {"title": "class test", "priority": "a", "context": "test", "project": ""}, "3": {"title": "newest task", "priority": "b", "context": "", "project": ""}}
+{
+  "1": {
+    "title": "take out the trash",
+    "priority": "b",
+    "context": "home",
+    "project": "cleanup"
+  },
+  "2": {
+    "title": "everything seems to work",
+    "priority": "d",
+    "context": "home",
+    "project": "todo app"
+  }
+}
