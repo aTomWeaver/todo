@@ -4,21 +4,25 @@ from datetime import datetime
 
 tasks = json.load(open('./current.json', 'r'))
 
+
+def refresh_tasks():
+    tasks = json.load(open('./current.json', 'r'))
+
+
+refresh_tasks()
 # helpers
 
 
-def reindex_tasks():
-    keys = [int(key) for key in tasks.keys()]
+def reindex(dict):
+    keys = [int(key) for key in dict.keys()]
 
     if int(max(keys)) > len(keys):
         i = 1
         for key in keys:
-            tasks[i] = tasks.pop(str(key))
+            dict[i] = dict.pop(str(key))
             i += 1
-    else:
-        print('already properly indexed')
     with open('current.json', 'w', encoding='utf-8') as current:
-        json.dump(tasks, current)
+        json.dump(dict, current)
 
 
 def get_max_value_length(value):
@@ -32,31 +36,41 @@ def get_max_value_length(value):
 
 
 # create
-def add_task():
-    task = json.dumps({"title": "testing", "priority": "c",
-                      "context": "home"}, indent=2)
-    print(task)
-    reindex_tasks()
+def add_task(new_task: dict):
+    '''accepts dict of title, priority, context, project'''
+    task_buffer = tasks.copy()
+    reindex(task_buffer)
+    keys = [int(key) for key in task_buffer.keys()]
+    new_task_index = max(keys) + 1
+
+    task_buffer[str(new_task_index)] = new_task
+    with open('current.json', 'w', encoding='utf-8') as current:
+        json.dump(task_buffer, current)
     pass
 
 # read
 
 
 def list_current_tasks():
-    reindex_tasks()
-    max_title_lenth = get_max_value_length('title')
-    max_context_length = get_max_value_length('context')
+    tasks = json.load(open('./current.json', 'r'))
+    reindex(tasks)
+    max_title_lenth = get_max_value_length('title') + 1
+    max_context_length = get_max_value_length('context') + 1
 
     for key in tasks.keys():
-        title = tasks[key]["title"]
-        priority = tasks[key]["priority"]
-        context = tasks[key]["context"]
-        project = tasks[key]["project"]
-        title_right_pad = (max_title_lenth - len(title)) * ' '
-        context_right_pad = (max_context_length - len(context)) * ' '
+        task = tasks[key]
 
-        print(
-            f'{key} ({priority}) {title} {title_right_pad}@{context}{context_right_pad} +{project}')
+        title_right_pad = (max_title_lenth - len(task["title"])) * ' '
+        context_right_pad = (max_context_length - len(task["context"])) * ' '
+
+        line = f'{key} ({task["priority"]}) {task["title"]}{title_right_pad}'
+        if task["context"]:
+            line += f'@{task["context"]}{context_right_pad}'
+        else:
+            line += f'{context_right_pad} '
+        if task["project"]:
+            line += f'+{task["project"]}'
+        print(line)
     pass
 
 
@@ -77,5 +91,11 @@ def complete_task(task):
     print(f'\nTask completed: {task}\nCompletion Date: {timestamp}')
 
 
-# add_task()
+add_task({
+    "title": "go to the movies",
+    "priority": "d",
+    "context": "outside",
+    "project": ""
+})
+
 list_current_tasks()
