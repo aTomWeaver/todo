@@ -2,19 +2,30 @@ import argparse
 import json
 from datetime import datetime
 
-tasks = json.load(open('./current.json', 'r'))
+current_tasks_dict = json.load(open('./current.json', 'r'))
 
 # helpers
 
 
-def reindex(dict):
-    keys = [int(key) for key in dict.keys()]
+def get_int_key_list(task_dict: dict):
+    return [int(key) for key in task_dict.keys()]
 
+
+def reindex(dict):
+    '''If highest task index is greater than the amount of tasks,
+    reindex tasks sequentially so that indexes don't continuously increase.
+    '''
+    # get keys as list of ints
+    keys = get_int_key_list(dict)
+
+    # reindex
     if int(max(keys)) > len(keys):
         i = 1
         for key in keys:
             dict[i] = dict.pop(str(key))
             i += 1
+
+    # overwrite
     with open('current.json', 'w', encoding='utf-8') as current:
         json.dump(dict, current)
 
@@ -22,8 +33,8 @@ def reindex(dict):
 def get_max_value_length(value):
     max_value_length = 0
 
-    for key in tasks.keys():
-        value_length = len(tasks[key][value])
+    for key in current_tasks_dict.keys():
+        value_length = len(current_tasks_dict[key][value])
         if value_length > max_value_length:
             max_value_length = value_length
     return max_value_length
@@ -31,28 +42,31 @@ def get_max_value_length(value):
 
 # create
 def add_task(new_task: dict):
-    '''accepts dict of title, priority, context, project'''
-    task_buffer = tasks.copy()
-    reindex(task_buffer)
-    keys = [int(key) for key in task_buffer.keys()]
+    '''Saves a new task to current.json from given dict of
+    {title, priority, context, project}.
+    '''
+    # copy and re-index current_task_dict
+    current_tasks_copy = current_tasks_dict.copy()
+    reindex(current_tasks_copy)
+    keys = get_int_key_list(current_tasks_copy)
     new_task_index = max(keys) + 1
 
-    task_buffer[str(new_task_index)] = new_task
+    current_tasks_copy[str(new_task_index)] = new_task
     with open('current.json', 'w', encoding='utf-8') as current:
-        json.dump(task_buffer, current)
+        json.dump(current_tasks_copy, current)
     pass
 
 # read
 
 
 def list_current_tasks():
-    tasks = json.load(open('./current.json', 'r'))
-    reindex(tasks)
+    current_tasks_dict = json.load(open('./current.json', 'r'))
+    reindex(current_tasks_dict)
     max_title_lenth = get_max_value_length('title') + 1
     max_context_length = get_max_value_length('context') + 1
 
-    for key in tasks.keys():
-        task = tasks[key]
+    for key in current_tasks_dict.keys():
+        task = current_tasks_dict[key]
 
         title_right_pad = (max_title_lenth - len(task["title"])) * ' '
         context_right_pad = (max_context_length - len(task["context"])) * ' '
@@ -84,12 +98,10 @@ def complete_task(task):
     timestamp = datetime.now().strftime('%Y/%m/%d %H:%M')
     print(f'\nTask completed: {task}\nCompletion Date: {timestamp}')
 
-
 add_task({
-    "title": "go to the movies",
-    "priority": "d",
-    "context": "outside",
-    "project": ""
+    "title": "check if work",
+    "priority": "a",
+    "context": "",
+    "project": "get working"
 })
-
 list_current_tasks()
