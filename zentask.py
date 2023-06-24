@@ -55,7 +55,7 @@ class TaskList:
     def archive_task(self, task_index):
         '''appends task to archive.json'''
         # with open('archive.json', 'a', encoding='utf-8') as archive:
-            
+
         pass
 
     def add_task(self, title, priority, context, project):
@@ -70,16 +70,17 @@ class TaskList:
             title, priority, context, project).get_dict()
         self.write_to_current_json(current_tasks_copy)
 
-    def delete_task(self, task_index):
+    def pop_task(self, task_index):
         self.refresh_current()
         # make copy
         current_tasks_copy = self.current_tasks_dict.copy()
         # remove element
-        current_tasks_copy.pop(task_index)
+        removed = current_tasks_copy.pop(task_index)
         # reindex
         current_tasks_copy = reindex(current_tasks_copy)
         # write copy to json
         self.write_to_current_json(current_tasks_copy)
+        return removed
 
     def list_current_tasks(self):
         '''prints out tasks to the command line'''
@@ -109,14 +110,14 @@ class TaskList:
 
             print(print_line)
 
-    def complete_task(self, task):
+    def complete_task(self, task_index):
         '''moves task from current to archive with a completion date'''
 
         timestamp = datetime.now().strftime('%Y/%m/%d %H:%M')
+        task = self.pop_task(task_index)
         task['completed'] = timestamp
 
         self.archive_task(task)
-        self.delete_task(task)
 
         print(
             f'\nTask completed: {task["title"]}\nCompletion Date: {timestamp}')
@@ -141,5 +142,7 @@ class Task:
 
 
 current_tasks = TaskList()
-current_tasks.delete_task('2')
+# current_tasks.add_task('newest task', 'b', '', 'new')
+current_tasks.pop_task('3')
+
 current_tasks.list_current_tasks()
