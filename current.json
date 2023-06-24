@@ -10,5 +10,23 @@
     "priority": "d",
     "context": "home",
     "project": "todo app"
+  },
+  "3": {
+    "title": "new task",
+    "priority": "a",
+    "context": "home",
+    "project": ""
+  },
+  "4": {
+    "title": "this is new",
+    "priority": "b",
+    "context": "home",
+    "project": "dev"
+  },
+  "5": {
+    "title": "do the dishes",
+    "priority": "b",
+    "context": "home",
+    "project": ""
   }
 }

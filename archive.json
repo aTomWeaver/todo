@@ -19,5 +19,12 @@
     "context": "did i break it",
     "project": "dev environment",
     "completed": "2023/06/24 12:37"
+  },
+  "4": {
+    "title": "do the dishes",
+    "priority": "b",
+    "context": "",
+    "project": "",
+    "completed": "2023/06/24 19:55"
   }
 }
