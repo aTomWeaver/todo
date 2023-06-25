@@ -117,21 +117,21 @@ class TaskList:
         self.write_to_json_file(current_tasks_copy, self.current_json_path)
         return removed
 
-    def list_current_tasks(self):
+    def list_tasks(self, dict):
         '''prints out tasks to the command line'''
 
         self.refresh_current()
         self.current_tasks_dict = reindex(self.current_tasks_dict)
 
         max_title_lenth = get_max_value_length(
-            'title', self.current_tasks_dict) + 1
+            'title', dict) + 1
         max_context_length = get_max_value_length(
-            'context', self.current_tasks_dict) + 1
+            'context', dict) + 1
 
         print('\n--todo-----------')
 
-        for key in self.current_tasks_dict.keys():
-            task = self.current_tasks_dict[key]
+        for key in dict.keys():
+            task = dict[key]
 
             title_right_pad = (max_title_lenth - len(task["title"])) * ' '
             context_right_pad = (max_context_length -
@@ -167,7 +167,8 @@ class TaskList:
         except:
             print(f'No task with index {task_index}\n')
             return None
-        self.list_current_tasks()
+        self.refresh_current()
+        self.list_tasks(self.current_tasks_dict)
 
 
 def dummy(title):
@@ -217,9 +218,16 @@ print(args)
 
 if args.command == 'l':
     if args.priority:
-        current_tasks.list_current_tasks(args.priority)
+        filtered_dict = filter_dict(current_tasks.current_tasks_dict, 'priority', args.priority)
+        current_tasks.list_tasks(filtered_dict)
+    elif args.context:
+        filtered_dict = filter_dict(current_tasks.current_tasks_dict, 'context', args.context)
+        current_tasks.list_tasks(filtered_dict)
+    elif args.project:
+        filtered_dict = filter_dict(current_tasks.current_tasks_dict, 'project', args.project)
+        current_tasks.list_tasks(filtered_dict)
     else:
-        current_tasks.list_current_tasks()
+        current_tasks.list_tasks(current_tasks.current_tasks_dict)
 elif args.command == 'a':
     if not args.title:
         parser.error("The 'title' argument is required for adding a task")
@@ -250,4 +258,4 @@ elif args.command == 'd':
     else:
         current_tasks.pop_task(args.task_index)
 
-pprint(filter_dict(current_tasks.current_tasks_dict, 'context', 'home'))
+# pprint(filter_dict(current_tasks.current_tasks_dict, 'context', 'home'))
