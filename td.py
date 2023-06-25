@@ -1,6 +1,8 @@
+#!/usr/bin/env python
 from argparse import ArgumentParser
 import json
 from datetime import datetime
+from pprint import pprint
 
 # helpers
 
@@ -34,6 +36,15 @@ def get_max_value_length(value, task_dict):
         if value_length > max_value_length:
             max_value_length = value_length
     return max_value_length
+
+
+def filter_dict(dict, filter_key, filter_value):
+    filtered_dict = {}
+    for key, inner_dict in dict.items():
+        if inner_dict[filter_key] == filter_value:
+            filtered_dict[key] = inner_dict
+    return filtered_dict
+
 
 # classes
 
@@ -108,12 +119,16 @@ class TaskList:
 
     def list_current_tasks(self):
         '''prints out tasks to the command line'''
+
         self.refresh_current()
         self.current_tasks_dict = reindex(self.current_tasks_dict)
+
         max_title_lenth = get_max_value_length(
             'title', self.current_tasks_dict) + 1
         max_context_length = get_max_value_length(
             'context', self.current_tasks_dict) + 1
+
+        print('\n--todo-----------')
 
         for key in self.current_tasks_dict.keys():
             task = self.current_tasks_dict[key]
@@ -148,12 +163,11 @@ class TaskList:
             self.archive_task(task)
 
             print(
-                f'\nTask completed: {task["title"]}\nCompletion Date: {timestamp}\n')
+                f'Task completed: {task["title"]}\nCompletion Date: {timestamp}\n')
         except:
             print(f'No task with index {task_index}\n')
             return None
-
-    pass
+        self.list_current_tasks()
 
 
 def dummy(title):
@@ -163,31 +177,49 @@ def dummy(title):
 current_tasks = TaskList()
 
 parser = ArgumentParser(description='Simple CLI todo app')
+# the first argument will be for the 'command'(l, a, c, d)
 subparsers = parser.add_subparsers(dest="command")
 
 # 'list' command parser
 list_parser = subparsers.add_parser('l', help='list current tasks')
+list_parser.add_argument('-pt', '--priority', nargs='?',
+                         help='list only tasks from the given priority')
+list_parser.add_argument('-c', '--context', nargs='?',
+                         help='list only tasks from the given context')
+list_parser.add_argument('-p', '--project', nargs='?',
+                         help='list only tasks from the given project')
 
 # 'add' command parser
 add_task_parser = subparsers.add_parser(
     'a', help='add a task via `a <task title> <priority> (context) (project)`')
 add_task_parser.add_argument('title', nargs='?', help='the name of the task')
-add_task_parser.add_argument('priority', nargs='?', help='the priority of the task')
+add_task_parser.add_argument(
+    'priority', nargs='?', help='the priority of the task')
 add_task_parser.add_argument('-c', '--context', nargs='?',
-                        help='the context in which the task should be performed (e.g. home, office, etc.)')
+                             help='the context in which the task should be performed (e.g. home, office, etc.)')
 add_task_parser.add_argument('-p', '--project', nargs='?',
-                    help='(optional) the project that the task is for')
+                             help='(optional) the project that the task is for')
 
 # 'complete' command parser
 complete_task_parser = subparsers.add_parser(
-    'c', help='complete a task via `c <task index>')
-complete_task_parser.add_argument('task_index', nargs='?', help='the index of the task to be completed')
+    'c', help='complete a task via `c <task index>`')
+complete_task_parser.add_argument(
+    'task_index', nargs='?', help='the index of the task to be completed')
+
+# 'delete' command parser
+delete_task_parser = subparsers.add_parser(
+    'd', help='delete a task via `d <task index>`')
+delete_task_parser.add_argument(
+    'task_index', nargs='?', help='the index of the task to be deleted')
 
 args = parser.parse_args()
 print(args)
 
 if args.command == 'l':
-    current_tasks.list_current_tasks()
+    if args.priority:
+        current_tasks.list_current_tasks(args.priority)
+    else:
+        current_tasks.list_current_tasks()
 elif args.command == 'a':
     if not args.title:
         parser.error("The 'title' argument is required for adding a task")
@@ -211,3 +243,11 @@ elif args.command == 'c':
             "The 'task index' argument is required for completing a task")
     else:
         current_tasks.complete_task(args.task_index)
+elif args.command == 'd':
+    if not args.task_index:
+        parser.error(
+            "The 'task index' argument is required for completing a task")
+    else:
+        current_tasks.pop_task(args.task_index)
+
+pprint(filter_dict(current_tasks.current_tasks_dict, 'context', 'home'))
