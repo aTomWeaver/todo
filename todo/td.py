@@ -181,6 +181,7 @@ class c:
 
     def project(text):
         return colored(text, 'light_yellow')
+
     def get_priority_color(priority):
         if priority == 'a':
             return c.p_a
@@ -200,16 +201,18 @@ class CLI:
         current_tasks.current_tasks_dict = reindex(
             current_tasks.current_tasks_dict)
 
-        max_title_lenth = get_max_value_length(
+        max_title_length = get_max_value_length(
             'title', dict) + 1
         max_context_length = get_max_value_length(
             'context', dict) + 1
+        max_project_length = get_max_value_length('project', dict)
 
-        print('--todo-' + ('-' * max_title_lenth))
+        print('--todo' + ('-' * (max_title_length +
+              max_context_length + max_project_length)))
 
         for key in dict.keys():
             task = dict[key]
-            title_right_pad = (max_title_lenth - len(task["title"])) * ' '
+            title_right_pad = (max_title_length - len(task["title"])) * ' '
             context_right_pad = (max_context_length -
                                  len(task["context"])) * ' '
             priority_color = c.get_priority_color(task['priority'])
