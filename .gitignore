@@ -1,4 +1,4 @@
-build/
-myenv/
+build
+myenv
 os
-td.egg-info/
+td.egg-info
