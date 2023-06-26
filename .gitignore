@@ -1,0 +1,4 @@
+build/
+myenv/
+os
+td.egg-info/
